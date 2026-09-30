@@ -422,6 +422,17 @@
 </head>
 
 <body class="lock">
+  <!-- Background Music -->
+  <audio
+    id="weddingMusic"
+    autoplay
+    loop
+    preload="auto"
+    playsinline
+  >
+    <source src="assets/wedding-song.mp3" type="audio/mpeg">
+  </audio>
+
 
   <!-- Opening screen -->
   <div class="opening" id="opening">
@@ -464,7 +475,7 @@
         <div class="hero-kicker reveal">Pemberkatan Nikah</div>
         <h1 class="hero-title reveal delay-1">Gio &amp; Rachel</h1>
         <div class="hero-divider reveal delay-2"></div>
-        <div class="hero-date reveal delay-2">17 / 07 / 27</div>
+        <div class="hero-date reveal delay-2">27 / 07 / 27</div>
         <button class="hero-cta reveal delay-3" id="openInvitation">Buka Undangan <span>↓</span></button>
       </div>
       <div class="scroll-cue" id="scrollCue" aria-hidden="true">
@@ -690,6 +701,80 @@
     };
 
     document.addEventListener("DOMContentLoaded", () => {
+
+      // ---------------- Background Music ----------------
+      // Try to start music as soon as the page is ready.
+      // Browser autoplay policies may block audible autoplay;
+      // if blocked, the first user interaction will retry it.
+      const weddingMusic =
+        document.getElementById("weddingMusic");
+
+      let musicStarted = false;
+
+      async function tryStartWeddingMusic() {
+
+        if (!weddingMusic || musicStarted) return;
+
+        try {
+
+          weddingMusic.volume = 1;
+          await weddingMusic.play();
+
+          musicStarted = true;
+
+        } catch (error) {
+
+          console.log(
+            "Autoplay musik diblokir browser. Akan mencoba lagi setelah interaksi pengguna.",
+            error
+          );
+
+        }
+
+      }
+
+      // Attempt immediately after DOM is ready.
+      tryStartWeddingMusic();
+
+      // Attempt again when all page resources are loaded.
+      window.addEventListener(
+        "load",
+        tryStartWeddingMusic,
+        { once: true }
+      );
+
+      // Existing opening button becomes the fallback user gesture.
+      // Query it here because the main DOM references are declared below.
+      const musicOpenInvitation = document.getElementById("openInvitation");
+      if (musicOpenInvitation) {
+        musicOpenInvitation.addEventListener(
+          "click",
+          tryStartWeddingMusic,
+          { once: true }
+        );
+      }
+
+      // Extra fallback: first interaction anywhere on the page.
+      const retryMusicOnInteraction = () => {
+
+        if (musicStarted) return;
+
+        tryStartWeddingMusic();
+
+      };
+
+      document.addEventListener(
+        "pointerdown",
+        retryMusicOnInteraction,
+        { passive: true }
+      );
+
+      document.addEventListener(
+        "touchstart",
+        retryMusicOnInteraction,
+        { passive: true }
+      );
+
       const opening = document.getElementById("opening");
       const menuToggle = document.getElementById("menuToggle");
       const menuPanel = document.getElementById("menuPanel");
